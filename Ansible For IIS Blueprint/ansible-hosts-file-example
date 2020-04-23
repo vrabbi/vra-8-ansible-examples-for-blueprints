@@ -1,0 +1,8 @@
+localhost
+[iis]
+
+[iis:vars]
+ansible_user=administrator
+ansible_password=PA$$W0RD
+ansible_winrm_server_cert_validation=ignore
+ansible_connection=winrm
