@@ -1,0 +1,102 @@
+formatVersion: 1
+name: Kubernetes - 1-Master/N-Workers (Ansible)
+version: 1
+inputs:
+  workerNodes:
+    type: integer
+  cpuCount:
+    type: integer
+    default: 4
+    title: CPU Count
+    minimum: 2
+    maximum: 8
+  ramGB:
+    type: integer
+    title: Memory GB
+    minimum: 1
+    maximum: 8
+    default: '2'
+resources:
+  Master-Node:
+    type: Cloud.Ansible
+    metadata:
+      layoutPosition:
+        - 1
+        - 1
+    properties:
+      inventoryFile: /etc/ansible/hosts
+      username: root
+      playbooks:
+        provision:
+          - /home/ansible/playbooks/kubernetes-master.yml
+      osType: linux
+      groups:
+        - KubeM
+      maxConnectionRetries: 10
+      host: '${resource.Master.*}'
+      account: ansible
+      password: <PASSWORD>
+  Worker-Node:
+    type: Cloud.Ansible
+    metadata:
+      layoutPosition:
+        - 1
+        - 2
+    properties:
+      count: '${input.workerNodes}'
+      inventoryFile: /etc/ansible/hosts
+      username: root
+      playbooks:
+        provision:
+          - /home/ansible/playbooks/kubernetes-worker.yml
+      osType: linux
+      groups:
+        - KubeW
+      maxConnectionRetries: 10
+      host: '${resource.Worker.*}'
+      account: ansible
+      password: <PASSWORD>
+  Master:
+    type: Cloud.Machine
+    metadata:
+      layoutPosition:
+        - 1
+        - 3
+    properties:
+      image: ubuntu
+      flavor: medium
+      constraints:
+        - tag: 'env:vc'
+      networks:
+        - network: '${resource.Cloud_vSphere_Network_1.id}'
+          assignment: static
+  Worker:
+    type: Cloud.Machine
+    dependsOn:
+      - Master-Node
+    metadata:
+      layoutPosition:
+        - 1
+        - 4
+    properties:
+      count: '${input.workerNodes}'
+      image: ubuntu
+      flavor: medium
+      storage:
+        constraints:
+          - tag: 'env:vc'
+      constraints:
+        - tag: 'env:vc'
+      networks:
+        - network: '${resource.Cloud_vSphere_Network_1.id}'
+          assignment: static
+  Cloud_vSphere_Network_1:
+    type: Cloud.vSphere.Network
+    metadata:
+      layoutPosition:
+        - 2
+        - 0
+    properties:
+      networkType: existing
+      constraints:
+        - tag: 'env:vc'
