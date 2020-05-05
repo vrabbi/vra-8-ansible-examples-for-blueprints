@@ -1,0 +1,1 @@
+kubeadm join 172.77.0.19:6443 --token 21pbsd.cyfs3ks8ilzuxrqd     --discovery-token-ca-cert-hash sha256:e616e7323c13197be105957e43ddad82eba67adc11a88abed766492977c0fc82 
